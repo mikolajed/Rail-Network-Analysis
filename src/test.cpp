@@ -35,16 +35,16 @@ int main() {
 		TEST 1
 		The connection does not exist in the database and should not be present in the Railway
 	*/
-	test_out(	"TEST 1",
-				not IndiaExpress.connection_exists("A", "B"),
-				"Connection between station should not exist");
+	test_out("TEST 1",
+		not IndiaExpress.connection_exists("A", "B"),
+		"Connection between station should not exist");
 	/*
 		TEST 2
 		Connection exists but is not recognized by the system
 	*/
-	test_out(	"TEST 2",
-				IndiaExpress.connection_exists("ABHANPUR JN.", "RAJIM"),
-				"Connection not recognized by the system");
+	test_out("TEST 2",
+		IndiaExpress.connection_exists("ABHANPUR JN.", "RAJIM"),
+		"Connection not recognized by the system");
 	/*
 		TEST 3
 		Check if the schedule of a station is presented corretly
@@ -52,13 +52,13 @@ int main() {
 	*/
 	ss.str(string()); // clean stream	
 	IndiaExpress.show_schedule(ss, "VRIDHA CHALAM JN.");
-	is_failed = (ss !=	"76845\tVRI-TPJ PASS\tVRIDHA CHALAM JN.\tTIRUCHIRAPPALLI JN.\tWednesday\n"
-						"76849\tVRI-SA PASSR\tVRIDHA CHALAM JN.\tSALEM JN.\tWednesday\n"
-						"76847\tVRI-SA PASSR\tVRIDHA CHALAM JN.\tSALEM JN.\tFriday\n");
+	is_failed = (ss != 	"76845\tVRI-TPJ PASS\tVRIDHA CHALAM JN.\tTIRUCHIRAPPALLI JN.\tWednesday\n"
+				"76849\tVRI-SA PASSR\tVRIDHA CHALAM JN.\tSALEM JN.\tWednesday\n"
+				"76847\tVRI-SA PASSR\tVRIDHA CHALAM JN.\tSALEM JN.\tFriday\n");
 
-	test_out(	"TEST 3",
-				is_failed,
-				"The schedule is not presented corretly");
+	test_out("TEST 3",
+		is_failed,
+		"The schedule is not presented corretly");
 	/*
 		TEST 4
 		Check if reservation is done correctly
@@ -67,10 +67,10 @@ int main() {
 	ss.str(string()); // clean stream	
 	
 	IndiaExpress.show_reservations(ss);
-	is_failed = (ss !=	"1\t76845\tVRI-TPJ PASS\tVRIDHA CHALAM JN.\tTIRUCHIRAPPALLI JN.\tWednesday\n");
-	test_out(	"TEST 4",
-				is_failed,
-				"Reservation is not made or/and showed correctly");
+	is_failed = (ss != "1\t76845\tVRI-TPJ PASS\tVRIDHA CHALAM JN.\tTIRUCHIRAPPALLI JN.\tWednesday\n");
+	test_out("TEST 4",
+		is_failed,
+		"Reservation is not made or/and showed correctly");
 
 	/*
 		TEST 5
@@ -82,9 +82,9 @@ int main() {
 	
 	IndiaExpress.show_reservations(ss);
 	is_failed = (ss !=	"");
-	test_out(	"TEST 5",
-				is_failed,
-				"Reservation is not cancelled correctly");
+	test_out("TEST 5",
+		is_failed,
+		"Reservation is not cancelled correctly");
 
 	/*
 		TEST 6
@@ -96,9 +96,9 @@ int main() {
 	
 	IndiaExpress.show_reservations(ss);
 	is_failed = (ss !=	"");
-	test_out(	"TEST 6",
-				is_failed,
-				"Reservation is not cancelled correctly if no reservations have been made");
+	test_out("TEST 6",
+		is_failed,
+		"Reservation is not cancelled correctly if no reservations have been made");
 		
 	/*
 		TEST 7
@@ -110,11 +110,11 @@ int main() {
 	ss.str(string()); // clean stream	
 	
 	IndiaExpress.show_reservations(ss);
-	is_failed = (ss !=	"1\t76845\tVRI-TPJ PASS\tVRIDHA CHALAM JN.\tTIRUCHIRAPPALLI JN.\tWednesday\n");
-						"2\t76845\tVRI-TPJ PASS\tVRIDHA CHALAM JN.\tTIRUCHIRAPPALLI JN.\tWednesday\n");
-	test_out(	"TEST 7",
-				is_failed,
-				"Two reservations are not made correctly");
+	is_failed = (ss != 	"1\t76845\tVRI-TPJ PASS\tVRIDHA CHALAM JN.\tTIRUCHIRAPPALLI JN.\tWednesday\n");
+				"2\t76845\tVRI-TPJ PASS\tVRIDHA CHALAM JN.\tTIRUCHIRAPPALLI JN.\tWednesday\n");
+	test_out("TEST 7",
+		is_failed,
+		"Two reservations are not made correctly");
 
 	/*
 		TEST 8
@@ -126,9 +126,9 @@ int main() {
 	
 	IndiaExpress.show_reservations(ss);
 	is_failed = ( ss != "" );
-	test_out(	"TEST 8",
-				is_failed,
-				"Cancellation of all reservations is not made correctly");
+	test_out("TEST 8",
+		is_failed,
+		"Cancellation of all reservations is not made correctly");
 	/* 
 		TODO: Features to be added
 		IndiaExpress.show_suggested_trips(origin);
