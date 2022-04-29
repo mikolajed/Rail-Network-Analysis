@@ -76,6 +76,7 @@ class Railway {
 		vector<string> shortest_path(string origin_code, string dest_code);
 	};
 
+	TrainNetwork Network;
 	// if date is not specified current date is used
 	Railway(string data_path);
 	Railway(string data_path, Time date);
