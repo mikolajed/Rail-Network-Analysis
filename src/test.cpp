@@ -26,8 +26,6 @@ int main() {
 	// create a railway based on data in specified path
 	Railway IndiaExpress("./data");
 
-	time_t date = now();
-
 	stringstream ss;
 	bool is_failed;
 
