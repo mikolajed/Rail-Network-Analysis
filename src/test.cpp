@@ -6,7 +6,6 @@
 	At this stage ONLY train_info.csv is used.
 */
 #include<iostream>
-#include<ctime>
 #include<Railway.hpp>
 
 using namespace std;
