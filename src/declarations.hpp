@@ -82,7 +82,7 @@ class Railway {
 
 public:
 	void show_schedule(stringstream& ss, string station_name);
-	bool connection_exists(string origin_name, string dest_name)
+	bool connection_exists(string origin_name, string dest_name);
 	void make_reservation(int train_no, string origin_code, string dest_code);
 	bool cancel_reservation(int ticket_id);
 	void show_reseverations(stringstream& ss);
