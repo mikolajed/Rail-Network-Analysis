@@ -7,7 +7,7 @@
 
 class Railway {
 	using namespace std;
-	using time_t Time;
+	typedef time_t Time;
 	
 	class Ticket {
 	public:
@@ -70,7 +70,9 @@ class Railway {
 		vector<string> shortest_path(string origin_code, string dest_code);
 	};
 
+	// if date is not specified current date is used
 	Railway(string data_path);
+	Railway(string data_path, Time date);
 
 public:
 	void show_schedule(stringstream& ss, string station_name);
@@ -82,5 +84,5 @@ public:
 	
 	TODO:
 	void show_suggested_trips(string origin_name, string dest_name, Time date);
-	void made_suggested_reservation(int suggested_trip_no, string origin_name, string dest_name, Time date);
+	void make_suggested_reservation(int suggested_trip_no, string origin_name, string dest_name, Time date);
 };
