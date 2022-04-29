@@ -82,7 +82,7 @@ public:
 	void show_reseverations(stringstream& ss);
 	void cancel_all_reservations();
 	
-	TODO:
+	// TODO:
 	void show_suggested_trips(string origin_name, string dest_name, Time date);
 	void make_suggested_reservation(int suggested_trip_no, string origin_name, string dest_name, Time date);
 };
