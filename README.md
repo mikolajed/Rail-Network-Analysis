@@ -1,3 +1,3 @@
-# Rail-Network-Analizer
+# Rail-Network-Analiysis
 
 Project uses C++ 17
