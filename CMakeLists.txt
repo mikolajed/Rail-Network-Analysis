@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.11) # FetchContent is available in 3.11+
-project(Rails)
-set (CMAKE_CXX_STANDARD 17)
+cmake_minimum_required(version 3.11) # fetchcontent is available in 3.11+
+project(rails)
+set (cmake_cxx_standard 17)
 include(FetchContent)
 
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
