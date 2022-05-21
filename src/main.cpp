@@ -21,20 +21,44 @@ int main(int argc, const char * argv[]) {
 	cout<<"DIAGNOSTICS\n"<<ss.str();
 	ss.str("");
 #endif
-#if 0	
+#if 0
 	r.show_stations(ss);
 	cout<<"LIST OF STATIONS\n"<<ss.str();
 	ss.str("");	
 #endif
 #if 0
+	    r.show_routes(ss);
+	    cout<<"ROUTES\n"<<ss.str();
+	    ss.str("");	
+#endif
+#if 0
+	    r.show_connections(ss);
+	    cout<<"CONNECTIONS\n"<<ss.str();
+	    ss.str("");	
+#endif
+#if 0
 	r.show_routes(ss);
 	cout<<"ROUTES\n"<<ss.str();
 	ss.str("");	
+	while (1) {
+	    	int x;
+		cout<<"Input Train No.: ";
+		cin>>x;
+		r.show_route_details(ss, x);
+		cout<<"ROUTE "<<x<<" DETAILS\n"<<ss.str();
+		ss.str("");
+	}
+#endif	
+#if 0
+	    r.show_schedule(ss, "SAWANTWADI R");
+	    cout<<"DEPARTURES:\n";
+	    cout<<ss.str();
+	    ss.str("");	
 #endif
 #if 1
-	r.show_route_details(ss, 107);
-	cout<<"ROUTE "<<107<<" DETAILS\n"<<ss.str();
-	ss.str("");
-#endif	
+	    r.show_reservations(ss);
+	    cout<<ss.str();
+	    ss.str("");	
+#endif
 	return 0;
 }

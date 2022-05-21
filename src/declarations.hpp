@@ -26,7 +26,7 @@ class Railway {
 		int train_no;
 		double price;
 		int seat_number;
-		bool cancelled;
+		bool cancelled = false;
 		Time date;
 	};
 	vector<Ticket> ticket_log;
@@ -47,8 +47,8 @@ class Railway {
 		int origin;	// index of origin station in stations vector
 		int dest; 	// index of destination station in stations vector	
 		int distance;
-		Time arrival_time;
-		Time departure_time;
+		Time departure_time;	// departure time from origin
+		Time arrival_time;	// arrival time at the destination 
 	};
 	vector<Connection> connections;
 	
@@ -101,11 +101,12 @@ class Railway {
 	bool station_exists(string name);
 	bool route_exists(int train_no); 
 	void add_station(string name1, string name2);
-	void add_connection(string name1, string name2, int train_no, Time arrival_time, Time departure_time, int distance);
+	void add_connection(string name1, string name2, int train_no, Time dt, Time da, int distance);
 	void add_route(string, string, int);
 public:
 	Railway(string data_path);
 	void show_routes(stringstream& ss);
+	void show_connections(stringstream& ss);
 	void show_stations(stringstream& ss);
 	void show_schedule(stringstream& ss, string station_name);
 	void show_route_details(stringstream& ss, int route_id);

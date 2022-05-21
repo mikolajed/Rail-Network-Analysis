@@ -84,26 +84,31 @@ Railway::Railway(string data_path) {
 	data.close();
 
 	// Build Railway object
-	for (int i = 0; i < rows.size(); ++i) {
+	this->add_station(rows[0][2], rows[0][3]);
+	for (int i = 1; i < rows.size(); ++i) {
 		vector<string>& row = rows[i];
-		if (row[5] == "1") cerr<<"Ejj: "<<rows[i][3]<<"\n";
 		this->add_station(row[2], row[3]);
 		if (row[0] != "1") {
 			this->add_connection(	rows[i-1][3],		// Station name 1
 						rows[i][3],		// Station name 2	 
 						stoi(row[1]), 		// Train No.
-						Time (row[5], ""), 	// Arrival time	
-						Time (row[6], ""),  	// Departure time	
+						Time (rows[i-1][6], ""),// Departure time from 1	
+						Time (rows[i][5], ""),  // Arrival time at 2
 						stoi(row[7])  		// Distance	
 						);
 		}
-		else if (i > 0) {
-			this->add_route(rows[i - stoi(rows[i-1][0]) + 1][3], // First station
+		else if (row[0] == "1") {
+			this->add_route(rows[i - stoi(rows[i-1][0])][3], // First station
 					rows[i-1][3],		// Last station on a route
 					stoi(rows[i-1][1])	// Train No.
 					);
-		}	
+		}
 	}
+	int last = rows.size() - 1;	
+	this->add_route(rows[last - stoi(rows[last][0]) + 1][3], // First station
+			rows[last][3],		// Last station on a route
+			stoi(rows[last][1])	// Train No.
+			);
 }
 
 // checks if the statoin with given name is already present in a Railway object
@@ -185,6 +190,17 @@ void Railway::show_stations(stringstream& ss) {
 	}
 }
 
+void Railway::show_connections(stringstream& ss) {
+	using std::left;
+	using std::right;
+	ss<<setw(16)<<left<<"From"<<setw(16)<<left<<"To"<<setw(16)<<left<<"Train No."<<"\n";
+	for (Connection& c: this->connections) {
+		ss<<setw(16)<<left<<this->stations[c.origin].name;
+		ss<<setw(16)<<left<<this->stations[c.dest].name;
+		ss<<setw(16)<<left<<c.train_no<<"\n";
+	}
+}
+
 void Railway::show_routes(stringstream& ss) {
 	using std::left;
 	using std::right;
@@ -197,26 +213,24 @@ void Railway::show_routes(stringstream& ss) {
 	}		
 }
 
-/*
+
 void Railway::show_schedule(stringstream& ss, string station_name) {
+	using std::left;
+	using std::right;
 	if (not this->station_exists(station_name)) {
 		ss<<"Station "<<station_name<<" does not exist\n";
 		return;
 	}	
-	ss<<"STATION: "<<station_name<<"\n";	
-	ss<<"DEPARTURES:\n";
-	ss<<"Train No. |\tFrom |\tTo |\tTime\n";
-	ss<<"-------------------------------\n";
+	ss<<setw(16)<<left<<"Train No."<<setw(16)<<left<<"From"<<setw(16)<<left<<"To"<<setw(16)<<left<<"Time"<<"\n";
 	const set<int>& out = this->network.get_out_edges( this->station_IDs[station_name] );
 	for (auto& id: out) {
-		auto& route = this->routes[ (this->connections[id].route_id) ];
-		ss<<route.train_no<<"\t";
-		ss<<this->stations[route.origin	].name<<"\t";
-		ss<<this->stations[route.dest	].name<<"\t";
-		ss<<this->connections[id].arrival_time.get_time()<<"\n";
+		auto& route = this->routes[ this->route_IDs[(this->connections[id].train_no)] ];
+		ss<<setw(16)<<left<<route.train_no;
+		ss<<setw(16)<<left<<this->stations[route.origin	].name;
+		ss<<setw(16)<<left<<this->stations[route.dest	].name;
+		ss<<setw(16)<<left<<this->connections[id].departure_time.get_time()<<"\n";
 	}
 }
-*/
 
 void Railway::show_route_details(stringstream& ss, int train_no) {
 	using std::left;
@@ -233,14 +247,14 @@ void Railway::show_route_details(stringstream& ss, int train_no) {
 		ss<<"No route details, it has no stations.\n";
 		return;
 	}	
-	ss<<setw(16)<<left<<"Departure"<<setw(16)<<"Station name"<<"\n";
+	ss<<setw(16)<<left<<"Time"<<setw(16)<<"Station name"<<"\n";
 	for (int i=0; i<edges.size(); ++i) {
-		Connection& curr = this->connections[i];
+		Connection& curr = this->connections[edges[i]];
 		ss<<setw(16)<<curr.departure_time.get_time();
 		ss<<setw(16)<<this->stations[curr.origin].name<<"\n";
 	}
-	Connection& last = this->connections[edges.size() - 1];
-	ss<<setw(16);
+	Connection& last = this->connections[edges[edges.size() - 1]];
+	ss<<setw(16)<<last.arrival_time.get_time();
 	ss<<setw(16)<<this->stations[last.dest].name<<"\n";
 }
 
@@ -250,20 +264,29 @@ bool Railway::connection_exists(string origin_name, string dest_name) {
 
 	return this->network.two_nodes_connected(origin_idx, dest_idx);
 }
-/*
-bool Railway::make_reservation(int train_no, string origin_code, string dest_code) {
+
+bool Railway::make_reservation(int train_no, string origin, string dest) {
 	int route_id = this->route_IDs[ train_no ];
-	// TODO check if its possible to make a reservation
 	
+	Route& route = this->routes[route_id];
+	if (this->stations[route.origin].name != origin or this->stations[route.dest].name != dest) {
+		cerr<<origin<<" -> "<<dest<<"route is not present in the system.\n";
+		return false;
+	}	
+
 	Ticket ticket;
+	ticket.from = origin;
+	ticket.to = dest;
+	ticket.train_no = train_no;	
 	ticket.id = this->ticket_log.size() - 1;
 	this->not_cancelled_tickets++;
 	this->ticket_log.push_back(ticket);
+	return true;
 }
 
 bool Railway::cancel_reservation(int ticket_id) {
 	for (auto& ticket: this->ticket_log)
-		if (ticket.id == ticket.id) {
+		if (ticket_id == ticket.id) {
 			ticket.cancelled = true;
 			this->not_cancelled_tickets--;
 			return true;
@@ -272,22 +295,29 @@ bool Railway::cancel_reservation(int ticket_id) {
 }
 
 void Railway::show_reservations(stringstream& ss) {
+	using std::left;
+	using std::right;	
+
 	if (this->not_cancelled_tickets == 0) {
 		ss<<"No reservations\n";
 		return;
 	}	
-	ss<<"TICKETS\n";
-	ss<<"-------\n";
-	ss<<"Ticket No. |\tTrain No. |\tFrom |\tTo |\tDate\n";
-	for (auto& ticket: this->tickets) {
+	ss<<setw(16)<<left<<"Ticket No."<<setw(16)<<left<<"Train No."<<setw(16)<<left<<"From"<<setw(16)<<left<<"To"<<setw(16)<<left<<"Date"<<"\n";
+	for (auto& ticket: this->ticket_log) {
 		if (ticket.cancelled == false) {
-			ss<<ticket.id<<"  \t"<<ticket.train_no<<"  \t"<<ticket.from<<"  \t"<<ticket.to<<"  \t"<<ticket.date<<"\n";
+			ss<<setw(16)<<left<<ticket.id;
+			ss<<setw(16)<<left<<ticket.train_no;
+			ss<<setw(16)<<left<<ticket.from;
+			ss<<setw(16)<<left<<ticket.to;
+			ss<<setw(16)<<left<<ticket.date.get_day()<<"\n";
 		}
 	}
 }
-*/
-void Railway::cancel_all_reservations() {
 
+void Railway::cancel_all_reservations() {
+	for (auto& ticket: this->ticket_log)
+		ticket.cancelled = true;
+		this->not_cancelled_tickets--;
 }
 
 void Railway::show_suggested_trips(string origin_name, string dest_name, Time date) {
@@ -458,7 +488,6 @@ bool Railway::TrainNetwork::two_nodes_connected(int v_idx, int u_idx) {
 
 void Railway::TrainNetwork::walk_route_from(int v_idx, int train_no, vector<int>& walk) {
 	vector<int> v;
-	cerr<<"Walk: "<<v_idx<<"\n";
 	if (not this->node_exists(v_idx)) {
 		cerr<<"Node does not exits in the graph.\n";
 		exit(1);
