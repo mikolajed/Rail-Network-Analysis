@@ -5,8 +5,6 @@
 #include<ctime>
 #include<set>
 
-//#include<graph.hpp>
-
 using namespace std;
 
 class Railway {
@@ -14,15 +12,15 @@ class Railway {
 		string time;	// format hh:mm:ss
 		string day;
 		
-		bool correct_format(string time);
+		bool correct_format();
 	public:
-		Time(string time, string day = "");
+		Time(string time = "", string day = "");
 		int to_int();
-		//string get_time();
-		//string get_day();
+		const string& get_time() const;
+		const string& get_day() const;
 	};
 		
-	class Ticket {
+	struct Ticket {
 		int id;
 		string from, to;
 		int train_no;
@@ -45,7 +43,7 @@ class Railway {
 
 	struct Connection {
 		int train_no;	// indentifies a route
-		int route_id;
+		int route_id;	// index of a route in routes vector
 		int origin;	// index of origin station in stations vector
 		int dest; 	// index of destination station in stations vector	
 		int distance;
@@ -72,7 +70,7 @@ class Railway {
 			set<int> adj_out;	// stores list of outgoing connections
 		};
 		struct Edge {
-			int route_id;		// there might be many connections between two stations
+			int train_no;		// there might be many connections between two stations
 			int v_idx, u_idx; 	// indexes of nodes in nodes vector
 			int arrvial_time;
 		};
@@ -92,13 +90,16 @@ class Railway {
 		// adding an edge between nodes can be done ONLY IF both nodes exist in the graph
 		void add_edge(int route_id, int v_idx, int u_idx, int arrival_time);
 		bool two_nodes_connected(int v_idx, int u_idx);
+		void walk_route_from(int v_idx, int train_no, vector<int>& walk);
 		vector<int> shortest_path(int v_idx, int u_idx);
-		//const set<int>& get_in_edges(int idx) const;
-		//const set<int>& get_out_edges(int idx) const;
+		const set<int>& get_in_edges(int idx) const;
+		const set<int>& get_out_edges(int idx) const;
+		void show_statistics(stringstream& ss);
 	};
 	TrainNetwork network;
 	
-	bool station_exists(string name); 
+	bool station_exists(string name);
+	bool route_exists(int train_no); 
 	void add_station(string name1, string name2);
 	void add_connection(string name1, string name2, int train_no, Time arrival_time, Time departure_time, int distance);
 	void add_route(string, string, int);
@@ -113,7 +114,7 @@ public:
 	bool cancel_reservation(int ticket_id);
 	void show_reservations(stringstream& ss);
 	void cancel_all_reservations();
-
+	void show_diagnostics(stringstream& ss);
 		
 	// TODO:
 	void show_suggested_trips(string origin_name, string dest_name, Time date);
