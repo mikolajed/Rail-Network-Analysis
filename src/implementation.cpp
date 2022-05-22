@@ -365,8 +365,6 @@ void Railway::make_suggested_reservation(int suggested_trip_no, string origin_na
 
 void Railway::show_diagnostics(stringstream& ss) {
 	ss<<"Memory usage\n";
-	long long totalVirtualMem = 0;
-	long long totalResidentMem = 0;
 #if __APPLE__	
 	/*vm_size_t page_size;
 	mach_port_t mach_port;
