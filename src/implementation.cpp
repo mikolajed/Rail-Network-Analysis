@@ -413,9 +413,8 @@ void Railway::show_diagnostics(stringstream& ss) {
 	//Add other values in next statement to avoid int overflow on right hand side...
 	virtualMemUsed += memInfo.totalswap - memInfo.freeswap;
 	virtualMemUsed *= memInfo.mem_unit;	
-	// TODO: Check if the unit are right, supposedly it is in KB
-	virtualMemUsed /= 1024;
-	totalVirtualMem /= 1024;
+	virtualMemUsed /= 8*1024*1024;
+	totalVirtualMem /= 8*1024*1024;
 	
 	ss<<"Virtual memory used:  "<<virtualMemUsed<<"MB\n";
 	ss<<"Total virtual memory: "<<totalVirtualMem<<"MB\n";
