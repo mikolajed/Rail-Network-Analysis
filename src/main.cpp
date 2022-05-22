@@ -9,7 +9,7 @@ using namespace std;
 using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
-	string path = "../data/train_schedule.csv";
+	string path = "../data/";
 
 	cout<<"Loading...\n";
 	Railway r(path);
@@ -49,7 +49,12 @@ int main(int argc, const char * argv[]) {
 		ss.str("");
 	}
 #endif	
-#if 0
+#if 1
+	    r.show_route_details(ss, 128);
+	    cout<<"ROUTE "<<128<<" DETAILS\n"<<ss.str();
+	    ss.str("");
+#endif
+#if 1
 	    r.show_schedule(ss, "SAWANTWADI R");
 	    cout<<"DEPARTURES:\n";
 	    cout<<ss.str();

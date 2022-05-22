@@ -9,25 +9,22 @@ using namespace std;
 
 class Railway {
 	class Time {
-		string time;	// format hh:mm:ss
-		string day;
-		
-		bool correct_format();
+		int time;	// time difference between Monday at 00:00:00 and given time
+		bool correct_format(string time, string day);
 	public:
-		Time(string time = "", string day = "");
-		int to_int();
-		const string& get_time() const;
-		const string& get_day() const;
+		Time(string time, string day);
+		string get_date();
+		int get_time();
+		int get_time() const;
+		int operator-(const Time& rhs);
 	};
 		
 	struct Ticket {
 		int id;
 		string from, to;
 		int train_no;
-		double price;
-		int seat_number;
 		bool cancelled = false;
-		Time date;
+		string day;	
 	};
 	vector<Ticket> ticket_log;
 	int not_cancelled_tickets = 0;	
@@ -56,7 +53,7 @@ class Railway {
 		int origin;	// index of origin station in stations vector
 		int dest; 	// index of destination station in stations vector	
 		int train_no; 	// an identifier of a route
-		//string days;
+		string day;
 	};
 	vector<Route> routes;
 	unordered_map<int, int> route_IDs; // maps train_no to route_id	
@@ -72,7 +69,7 @@ class Railway {
 		struct Edge {
 			int train_no;		// there might be many connections between two stations
 			int v_idx, u_idx; 	// indexes of nodes in nodes vector
-			int arrvial_time;
+			int dt;		// time difference in seconds, IMPORNAT: could be greater than one day, upper limit is 7*24*60*60 (number of seconds in one week)
 		};
 		// IMPORTANT:
 		// Date should only be push into vector of nedes and edges
@@ -102,7 +99,7 @@ class Railway {
 	bool route_exists(int train_no); 
 	void add_station(string name1, string name2);
 	void add_connection(string name1, string name2, int train_no, Time dt, Time da, int distance);
-	void add_route(string, string, int);
+	void add_route(string, string, int, string);
 public:
 	Railway(string data_path);
 	void show_routes(stringstream& ss);

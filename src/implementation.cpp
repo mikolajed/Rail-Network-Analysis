@@ -4,6 +4,7 @@
 #include<fstream>
 #include<vector>
 #include<set>
+#include<map>
 #include<list>
 #include<ctime>
 #include <iomanip>
@@ -31,7 +32,8 @@ using namespace std;
 */
 Railway::Railway(string data_path) {
 	// read data from external file and move it to the system, bulid a graph
-	ifstream data(data_path);
+	string schedules_path = data_path + "train_schedule.csv";
+	ifstream data(schedules_path);
 	if (not data.good()) {
 		cerr<<"Could not open file "<<data_path<<"\n";
 		exit(1);
@@ -79,9 +81,38 @@ Railway::Railway(string data_path) {
 				cells[10],	// Departure time
 				cells[11] 	// Distance
 				});
-		
 	}
 	data.close();
+
+	map<int, int> temp;	// maps train_no to index in days vector
+	// file that contains day on which a given train operates
+	string info_path = data_path + "train_info.csv";
+	data.open(info_path);
+	getline(data, heading);
+	line = "";
+	vector<string> days;
+	while (getline(data, line)) {
+		vector<string> cells;	
+		parse(cells, line);
+		line="";
+		days.push_back(cells[4]);
+		if (temp.count(stoi(cells[0])) > 0) {
+			// key already in the map, if that happens train_no is not an identifier
+			cerr<<"Key already exists, two different trains with the same train_no.\n";
+			exit(1); 
+		}
+		temp[stoi(cells[0])] = days.size() - 1;
+	}
+	// merge day into rows
+	for (auto& row: rows) { 
+		int train_no = stoi(row[1]);
+		if (temp.count(train_no) == 0) {
+			// there exists a train with missing data, no day on which it operates
+			cerr<<"Missing data in train_info.csv, no day for train_no "<<train_no<<"\n";
+			exit(1);
+		}	
+		row.push_back(days[ temp[train_no] ]);
+	}
 
 	// Build Railway object
 	this->add_station(rows[0][2], rows[0][3]);
@@ -92,22 +123,24 @@ Railway::Railway(string data_path) {
 			this->add_connection(	rows[i-1][3],		// Station name 1
 						rows[i][3],		// Station name 2	 
 						stoi(row[1]), 		// Train No.
-						Time (rows[i-1][6], ""),// Departure time from 1	
-						Time (rows[i][5], ""),  // Arrival time at 2
+						Time (rows[i-1][6], rows[i-1][8]),	// Departure time from 1	
+						Time (rows[i][5], rows[i][8]),	// Arrival time at 2
 						stoi(row[7])  		// Distance	
 						);
 		}
 		else if (row[0] == "1") {
 			this->add_route(rows[i - stoi(rows[i-1][0])][3], // First station
 					rows[i-1][3],		// Last station on a route
-					stoi(rows[i-1][1])	// Train No.
+					stoi(rows[i-1][1]),	// Train No.
+					rows[i-1][8]		// Day
 					);
 		}
 	}
 	int last = rows.size() - 1;	
 	this->add_route(rows[last - stoi(rows[last][0]) + 1][3], // First station
 			rows[last][3],		// Last station on a route
-			stoi(rows[last][1])	// Train No.
+			stoi(rows[last][1]),	// Train No.
+			rows[last][8]		// Day
 			);
 }
 
@@ -153,17 +186,17 @@ void Railway::add_connection(string name1, string name2, int train_no, Time arri
 	this->network.add_edge(	train_no, 
 				v_idx, 
 				u_idx, 
-				departure_time.to_int());	
+				arrival_time - departure_time);	
 }
 
-void Railway::add_route(string origin_name, string dest_name, int train_no) {
+void Railway::add_route(string origin_name, string dest_name, int train_no, string day) {
 	if (not this->station_exists(origin_name) or not this->station_exists(dest_name)) {
 		cerr<<"Adding a route between stations which do not exist!\n";
 		return;
 	}
 	int v_idx = this->station_IDs[origin_name];	
 	int u_idx = this->station_IDs[dest_name];
-	this->routes.push_back({v_idx, u_idx, train_no});
+	this->routes.push_back({v_idx, u_idx, train_no, day});
 	this->route_IDs[train_no] = this->routes.size() - 1;
 }
 
@@ -204,11 +237,12 @@ void Railway::show_connections(stringstream& ss) {
 void Railway::show_routes(stringstream& ss) {
 	using std::left;
 	using std::right;
-	ss<<setw(16)<<left<<"Train No."<<setw(16)<<left<<"From"<<setw(16)<<left<<"To"<<"\n";	
+	ss<<setw(16)<<left<<"Train No."<<setw(16)<<left<<"From"<<setw(16)<<left<<"To"<<setw(16)<<left<<"Day"<<"\n";	
 	for(Route& r: this->routes) {
 		ss<<setw(16)<<left<<r.train_no;
 		ss<<setw(16)<<left<<this->stations[r.origin].name;
 		ss<<setw(16)<<left<<this->stations[r.dest].name;
+		ss<<setw(16)<<left<<r.day;
 		ss<<"\n";	
 	}		
 }
@@ -228,7 +262,7 @@ void Railway::show_schedule(stringstream& ss, string station_name) {
 		ss<<setw(16)<<left<<route.train_no;
 		ss<<setw(16)<<left<<this->stations[route.origin	].name;
 		ss<<setw(16)<<left<<this->stations[route.dest	].name;
-		ss<<setw(16)<<left<<this->connections[id].departure_time.get_time()<<"\n";
+		ss<<setw(16)<<left<<this->connections[id].departure_time.get_date()<<"\n";
 	}
 }
 
@@ -250,11 +284,11 @@ void Railway::show_route_details(stringstream& ss, int train_no) {
 	ss<<setw(16)<<left<<"Time"<<setw(16)<<"Station name"<<"\n";
 	for (int i=0; i<edges.size(); ++i) {
 		Connection& curr = this->connections[edges[i]];
-		ss<<setw(16)<<curr.departure_time.get_time();
+		ss<<setw(16)<<curr.departure_time.get_date();
 		ss<<setw(16)<<this->stations[curr.origin].name<<"\n";
 	}
 	Connection& last = this->connections[edges[edges.size() - 1]];
-	ss<<setw(16)<<last.arrival_time.get_time();
+	ss<<setw(16)<<last.arrival_time.get_date();
 	ss<<setw(16)<<this->stations[last.dest].name<<"\n";
 }
 
@@ -275,10 +309,11 @@ bool Railway::make_reservation(int train_no, string origin, string dest) {
 	}	
 
 	Ticket ticket;
+	ticket.id = this->ticket_log.size() - 1,
 	ticket.from = origin;
 	ticket.to = dest;
-	ticket.train_no = train_no;	
-	ticket.id = this->ticket_log.size() - 1;
+	ticket.train_no = train_no;
+	ticket.day = route.day;
 	this->not_cancelled_tickets++;
 	this->ticket_log.push_back(ticket);
 	return true;
@@ -309,7 +344,7 @@ void Railway::show_reservations(stringstream& ss) {
 			ss<<setw(16)<<left<<ticket.train_no;
 			ss<<setw(16)<<left<<ticket.from;
 			ss<<setw(16)<<left<<ticket.to;
-			ss<<setw(16)<<left<<ticket.date.get_day()<<"\n";
+			ss<<setw(16)<<left<<ticket.day<<"\n";
 		}
 	}
 }
@@ -407,40 +442,75 @@ void Railway::show_diagnostics(stringstream& ss) {
 	IMPLEMENTATION OF TIME CLASS
 */
 Railway::Time::Time(string time, string day) {
-	this->time = time;
-	this->day = day;
-	if (not this->correct_format()) {
-		cerr<<"Incorrect time format ("<<this->time<<").\n";
+	if (not this->correct_format(time, day)) {
+		cerr<<"Incorrect time format ("<<time<<" "<<day<<").\n";
 		exit(1);
 	}
+	int h = 10*(time[0]-'0') + (time[1]-'0');
+	int m = 10*(time[3]-'0') + (time[4]-'0');
+	int s = 10*(time[6]-'0') + (time[7]-'0');
+	int d = 0;	
+	if (day[0] == 'M') d = 0;
+	else if (day[2] == 'e') d = 1;
+	else if (day[0] == 'W') d = 2;
+	else if (day[1] == 'h') d = 3;
+	else if (day[0] == 'F') d = 4;
+	else if (day[1] == 'a') d = 5;
+	else d = 6;
+
+	this->time = h*3600 + m*60 + s + d*24*3600;
 }
 // checks if time is in format hh:mm:ss
-bool Railway::Time::correct_format() {
-	string time = this->time; 
+bool Railway::Time::correct_format(string time, string day) {
 	if(time.size() != 8) return false; 
 	if (time[2] != ':' or time[5] != ':') return false; 
 	for (int i: {0, 1, 3, 4, 6, 7}) { 
 		if (time[i] < '0' or time[i] > '9')
 	 		return false; 
 	}
+	if (day != "Monday" and day != "Tuesday" and day != "Wednesday" and
+	    day != "Thursday" and day != "Friday" and day != "Saturday" and day != "Sunday") {
+		return false;
+	}
+	
 	return true;
 }
 
-// converts time in format hh:mm:ss to number of seconds since 00:00:00
-int Railway::Time::to_int() {
-	string time = this->time;
-	int h = 10*(time[0]-'0') + (time[1]-'0');
-	int m = 10*(time[3]-'0') + (time[4]-'0');
-	int s = 10*(time[6]-'0') + (time[7]-'0');
-
-	return s + 60 * m  + 3600 * h;
+string Railway::Time::get_date() {
+	int d = this->time/(24*3600);
+	vector<string> days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+	string day = days[d];
+	int t = this->time - d*(24*3600);
+	int h = t/3600;
+	t -= h*3600;
+	int m = t/60;
+	t -= m*60;
+	int s = t;
+	string time = "";
+	if (h < 10) time += "0";
+	time += std::to_string(h) + ":";
+	if (m < 10) time += "0";
+	time += std::to_string(m) + ":";
+	if (s < 10) time += "0";
+	time += std::to_string(s);
+	if (not this->correct_format(time, day)) {
+		cerr<<"Incorrect time format ("<<time<<" "<<day<<").\n";
+		exit(1);
+	}
+	return time + " " + day;
 }
 
-const string& Railway::Time::get_time() const { 
+int Railway::Time::get_time() {
 	return this->time;
 }
-const string& Railway::Time::get_day() const { 
-	return this->day;
+
+int Railway::Time::get_time() const {
+	return this->time;
+}
+
+int Railway::Time::operator-(const Time& rhs) {
+	// modulo operation is needed to prevent negative times, could happen if train rides on Sunday and then Monday, 7*24*3600 is the number of seconds in a week
+	return (this->time - rhs.get_time() + 7*24*3600)%(7*24*3600);
 }
 
 /*
