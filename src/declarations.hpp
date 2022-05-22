@@ -63,8 +63,8 @@ class Railway {
 	// there is a connection between two nodes if there exist at least one route between them
 	class TrainNetwork {
 		struct Node {
-			set<int> adj_in;	// stores list of incoming connections 
-			set<int> adj_out;	// stores list of outgoing connections
+			vector<int> adj_in;	// stores list of incoming connections 
+			vector<int> adj_out;	// stores list of outgoing connections
 		};
 		struct Edge {
 			int train_no;		// there might be many connections between two stations
@@ -89,8 +89,8 @@ class Railway {
 		bool two_nodes_connected(int v_idx, int u_idx);
 		void walk_route_from(int v_idx, int train_no, vector<int>& walk);
 		vector<int> shortest_path(int v_idx, int u_idx);
-		const set<int>& get_in_edges(int idx) const;
-		const set<int>& get_out_edges(int idx) const;
+		const vector<int>& get_in_edges(int idx) const;
+		const vector<int>& get_out_edges(int idx) const;
 		void show_statistics(stringstream& ss);
 	};
 	TrainNetwork network;
@@ -113,7 +113,6 @@ public:
 	void show_reservations(stringstream& ss);
 	void cancel_all_reservations();
 	void show_diagnostics(stringstream& ss);
-		
 	// TODO:
 	void show_suggested_trips(string origin_name, string dest_name, Time date);
 	void make_suggested_reservation(int suggested_trip_no, string origin_name, string dest_name, string date);

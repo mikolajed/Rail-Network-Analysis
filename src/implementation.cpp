@@ -256,7 +256,7 @@ void Railway::show_schedule(stringstream& ss, string station_name) {
 		return;
 	}	
 	ss<<setw(16)<<left<<"Train No."<<setw(16)<<left<<"From"<<setw(16)<<left<<"To"<<setw(16)<<left<<"Time"<<"\n";
-	const set<int>& out = this->network.get_out_edges( this->station_IDs[station_name] );
+	const vector<int>& out = this->network.get_out_edges( this->station_IDs[station_name] );
 	for (auto& id: out) {
 		auto& route = this->routes[ this->route_IDs[(this->connections[id].train_no)] ];
 		ss<<setw(16)<<left<<route.train_no;
@@ -513,12 +513,16 @@ int Railway::Time::operator-(const Time& rhs) {
 /*
 	IMPLEMENTATION OF GRAPH CLASS	
 */
-inline bool Railway::TrainNetwork::node_exists(int node_idx) {
+bool Railway::TrainNetwork::node_exists(int node_idx) {
 	return this->nodes.size() > node_idx and node_idx >= 0;;
 }
 
-inline bool Railway::TrainNetwork::edge_exists(int train_no, int v_idx, int u_idx) {
-	return this->nodes[v_idx].adj_out.find(u_idx) != this->nodes[v_idx].adj_out.end();
+bool Railway::TrainNetwork::edge_exists(int train_no, int v_idx, int u_idx) {
+	for (int e_idx: this->nodes[v_idx].adj_out) {
+		if (this->edges[e_idx].u_idx == u_idx and this->edges[e_idx].train_no == train_no)
+			return true;	
+	}
+	return false;
 }
 
 // make space in the nodes vector
@@ -544,8 +548,8 @@ void Railway::TrainNetwork::add_edge(int train_no, int v_idx, int u_idx, int arr
 
 	int edge_id = edges.size();	
 	this->edges.push_back(e);
-	this->nodes[v_idx].adj_out.insert(edge_id);
-	this->nodes[u_idx].adj_in.insert(edge_id);
+	this->nodes[v_idx].adj_out.push_back(edge_id);
+	this->nodes[u_idx].adj_in.push_back(edge_id);
 }
 
 // TODO
@@ -583,10 +587,10 @@ vector<int> Railway::TrainNetwork::shortest_path(int v_idx, int u_idx) {
 	return {};
 }
 
-const set<int>& Railway::TrainNetwork::get_in_edges(int idx) const {
+const vector<int>& Railway::TrainNetwork::get_in_edges(int idx) const {
 	return this->nodes[idx].adj_in;
 }
-const set<int>& Railway::TrainNetwork::get_out_edges(int idx) const {
+const vector<int>& Railway::TrainNetwork::get_out_edges(int idx) const {
 	return this->nodes[idx].adj_out;
 }
 
@@ -619,3 +623,4 @@ void Railway::TrainNetwork::show_statistics(stringstream& ss) {
 	}
 	ss<<"------------------------------\n";
 }
+
