@@ -1,0 +1,4 @@
+Ticket No.      Train No.       From            To              Date            
+1               22439           NEW DELHI       SHMATA VD KATRA Friday          
+2               22439           NEW DELHI       SHMATA VD KATRA Friday          
+3               107             SAWANTWADI R    MADGOAN JN.     Saturday        

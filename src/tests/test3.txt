@@ -1,0 +1,12 @@
+Train No.       From            To              Time            
+128             MADGOAN JN.     CHHATRAPATI     22:58:00 Friday 
+10103           CST-MUMBAI      MADGOAN JN.     14:31:00 Thursday
+10104           MADGOAN JN.     CST-MUMBAI      12:25:00 Monday 
+10111           CST-MUMBAI      MADGOAN JN.     06:26:00 Friday 
+10112           MADGOAN JN.     CST-MUMBAI      21:54:00 Saturday
+11003           DADAR           SAWANTWADI R    07:32:00 Friday 
+11004           SAWANTWADI R    DADAR           20:44:00 Friday 
+50101           RATNAGIRI       MADGOAN JN.     04:32:00 Saturday
+50102           MADGOAN JN.     RATNAGIRI       22:34:00 Monday 
+50105           DIVA JN         SAWANTWADI R    15:52:00 Friday 
+50106           SAWANTWADI R    DIVA JN         10:12:00 Saturday

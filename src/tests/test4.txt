@@ -1,0 +1,2 @@
+Ticket No.      Train No.       From            To              Date            
+0               22439           NEW DELHI       SHMATA VD KATRA Friday          
